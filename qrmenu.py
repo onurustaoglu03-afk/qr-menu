@@ -1,20 +1,24 @@
 import streamlit as st
 import os
-import base64
 
 st.set_page_config(page_title="Dijital Menü", layout="centered")
 
-# Tasarım Ayarları
+# Tasarım - Butonu iyice belirgin ve şık yapalım
 st.markdown("""
     <style>
-    div.stButton > button:first-child {
-        background-color: #FF4B4B; color: white; height: 5em;
-        width: 100%; border-radius: 20px; font-size: 24px; font-weight: bold;
-    }
-    .pdf-container {
+    .stButton > button {
+        background-color: #FF4B4B;
+        color: white;
+        height: 6em;
         width: 100%;
-        height: 80vh;
+        border-radius: 20px;
+        font-size: 26px;
+        font-weight: bold;
+        box-shadow: 0px 10px 20px rgba(255, 75, 75, 0.3);
         border: none;
+    }
+    .stApp {
+        background-color: #FFFFFF;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -24,34 +28,27 @@ query_params = st.query_params
 
 # 1. MÜŞTERİ EKRANI
 if query_params.get("view") == "customer":
-    # Session state ile menü açık mı kontrolü
-    if "show_menu" not in st.session_state:
-        st.session_state.show_menu = False
-
+    st.markdown("<br><br>", unsafe_allow_html=True)
     st.title("🍴 Hoş Geldiniz")
+    st.write("Menümüzü tam ekran incelemek için aşağıdaki butona dokunun.")
+    st.markdown("<br>", unsafe_allow_html=True)
     
-    if not st.session_state.show_menu:
-        st.write("Menümüzü incelemek için aşağıdaki butona dokunun.")
-        if st.button("📖 MENÜYÜ GÖRÜNTÜLE"):
-            st.session_state.show_menu = True
-            st.rerun()
+    if os.path.exists("guncel_menu.pdf"):
+        # PDF'i doğrudan Streamlit'in statik dosya sunucusu gibi açıyoruz
+        with open("guncel_menu.pdf", "rb") as f:
+            st.download_button(
+                label="📖 MENÜYÜ TAM EKRAN AÇ",
+                data=f,
+                file_name="menu.pdf",
+                mime="application/pdf",
+                use_container_width=True
+            )
+        st.info("💡 İpucu: Butona bastığınızda menü açılmazsa 'İndir/Aç' seçeneğine onay verin.")
+    else:
+        st.error("Menü güncelleniyor, lütfen bekleyin...")
     
-    if st.session_state.show_menu:
-        if os.path.exists("guncel_menu.pdf"):
-            with open("guncel_menu.pdf", "rb") as f:
-                base64_pdf = base64.b64encode(f.read()).decode('utf-8')
-            
-            # PDF'i bir iframe içinde sayfaya gömüyoruz
-            pdf_display = f'<iframe src="data:application/pdf;base64,{base64_pdf}" class="pdf-container" type="application/pdf"></iframe>'
-            st.markdown(pdf_display, unsafe_allow_html=True)
-            
-            if st.button("⬅️ Geri Dön"):
-                st.session_state.show_menu = False
-                st.rerun()
-        else:
-            st.error("Menü yükleniyor...")
-    
-    st.caption("Unal Grup Dijital Menü")
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.caption("Unal Grup | Dijital Menü Sistemi")
 
 # 2. YÖNETİCİ PANELİ
 else:

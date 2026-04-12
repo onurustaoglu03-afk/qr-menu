@@ -1,9 +1,9 @@
 import streamlit as st
 import os
 
-st.set_page_config(page_title="Dijital Menü", layout="centered")
+st.set_page_config(page_title="Deli2go Shell Kafe", layout="centered")
 
-# Tasarım - Resimlerin arasını ve butonları düzenleyelim
+# Tasarım Ayarları
 st.markdown("""
     <style>
     .stButton > button {
@@ -13,16 +13,19 @@ st.markdown("""
     img {
         max-width: 100%;
         border-radius: 10px;
-        margin-bottom: 15px; /* Resimlerin arasına boşluk */
+        margin-bottom: 15px;
         box-shadow: 0px 4px 15px rgba(0,0,0,0.1);
+    }
+    h1 {
+        color: #FF4B4B;
+        text-align: center;
     }
     </style>
     """, unsafe_allow_html=True)
 
 ADMIN_PASSWORD = "onur123"
-IMAGE_FOLDER = "menu_images" # Resimlerin saklanacağı klasör
+IMAGE_FOLDER = "menu_images"
 
-# Klasör yoksa oluştur
 if not os.path.exists(IMAGE_FOLDER):
     os.makedirs(IMAGE_FOLDER)
 
@@ -33,15 +36,18 @@ if query_params.get("view") == "customer":
     if "view_clicked" not in st.session_state:
         st.session_state.view_clicked = False
 
-    st.title("🍴 Hoş Geldiniz")
+    st.markdown("<br>", unsafe_allow_html=True)
+    # İstediğiniz özel karşılama metni
+    st.title("🥤 Deli2go Shell Kafeye Hoş Geldiniz")
     
     if not st.session_state.view_clicked:
+        st.write("Güncel menümüzü incelemek için butona dokunabilirsiniz.")
         if st.button("📖 MENÜYÜ GÖRÜNTÜLE"):
             st.session_state.view_clicked = True
             st.rerun()
     
     if st.session_state.view_clicked:
-        image_files = sorted([f for f in os.listdir(IMAGE_FOLDER) if f.endswith(('.jpg', '.jpeg', '.png'))])
+        image_files = sorted([f for f in os.listdir(IMAGE_FOLDER) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
         
         if image_files:
             for img_file in image_files:
@@ -51,26 +57,33 @@ if query_params.get("view") == "customer":
                 st.session_state.view_clicked = False
                 st.rerun()
         else:
-            st.warning("Menü şu an güncelleniyor...")
+            st.warning("Menü şu an güncelleniyor, lütfen biraz sonra tekrar deneyin.")
+    
+    st.caption("Unal Grup Dijital Menü Sistemi")
 
 # 2. YÖNETİCİ PANELİ
 else:
-    st.title("⚙️ Menü Yönetimi")
-    password = st.text_input("Şifre:", type="password")
+    st.title("⚙️ Yönetim Paneli")
+    password = st.text_input("Giriş Şifresi:", type="password")
+    
     if password == ADMIN_PASSWORD:
-        st.info("Birden fazla sayfa yükleyebilirsiniz. Sayfaların sırasını dosya isimlerine göre (1.jpg, 2.jpg gibi) düzenleyin.")
-        uploaded_files = st.file_uploader("Menü Sayfalarını Seçin", type=["jpg", "png", "jpeg"], accept_multiple_files=True)
+        st.info("İpucu: Resimleri 1.jpg, 2.jpg gibi isimlendirirseniz sırayla görünürler.")
+        # Dosya tipi kısıtlamasını esnettik (seçim hatasını önlemek için)
+        uploaded_files = st.file_uploader("Menü Resimlerini Seçin ve Yükleyin", accept_multiple_files=True)
         
-        if st.button("Menüyü Güncelle"):
+        if st.button("Menüyü Sisteme Yükle"):
             if uploaded_files:
-                # Eski resimleri temizle
+                # Klasörü temizle
                 for f in os.listdir(IMAGE_FOLDER):
                     os.remove(os.path.join(IMAGE_FOLDER, f))
                 
-                # Yeni resimleri kaydet
+                # Yeni dosyaları kaydet
                 for uploaded_file in uploaded_files:
                     with open(os.path.join(IMAGE_FOLDER, uploaded_file.name), "wb") as f:
                         f.write(uploaded_file.getvalue())
+                st.success(f"{len(uploaded_files)} sayfa başarıyla güncellendi!")
+            else:
+                st.error("Lütfen yüklenecek resimleri seçin.")
                 st.success(f"{len(uploaded_files)} sayfa başarıyla yüklendi!")
             else:
                 st.error("Lütfen önce dosya seçin.")

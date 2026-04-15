@@ -2,49 +2,87 @@ import streamlit as st
 import os
 import time
 
-# Sayfa Ayarları - Burası Streamlit'in kendi Dark Mode ayarını tetikler
+# Sayfa Ayarları - Tarayıcı sekmesinde görünen isim
 st.set_page_config(
     page_title="Deli2go Shell Kafe", 
     page_icon="🥤", 
-    layout="centered"
+    layout="centered",
+    initial_sidebar_state="collapsed"
 )
 
-# --- CSS: DARK MODE ZORLAMASI VE TASARIM ---
+# --- CSS: ARKA PLAN VE GELİŞMİŞ TASARIM ---
 st.markdown("""
     <style>
-    /* Dark Mode için arka planı ve metni zorla */
-    .stApp {
-        background-color: #0E1117;
-        color: #FFFFFF;
-    }
+    /* Ana Arkaplan Resmi ve Ayarları */
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
     
-    /* Kart ve Resim Tasarımı */
-    .stImage > img {
-        border-radius: 15px;
-        box-shadow: 0px 5px 15px rgba(0,0,0,0.5);
-        margin-top: 10px;
+    .stApp {
+        background-image: url('https://raw.githubusercontent.com/onur_unal/qr-menu/main/background.png');
+        background-position: center;
+        background-attachment: fixed;
+        font-family: 'Poppins', sans-serif;
     }
 
-    /* Kırmızı Gelişmiş Buton */
+    /* Arka plan üzerine metinlerin okunması için koyu katman */
+    .stApp > div {
+        background-color: rgba(0, 0, 0, 0.4); /* Kahve görseli üzerine %40 siyah katman */
+    }
+
+    /* Kart Tasarımı */
+    .stImage > img {
+        border-radius: 20px;
+        box-shadow: 0px 10px 30px rgba(0,0,0,0.7);
+        border: 1px solid rgba(255,255,255,0.1);
+        transition: transform 0.3s ease;
+    }
+    .stImage > img:hover {
+        transform: scale(1.02);
+    }
+
+    /* Profesyonel Kırmızı Buton */
     .stButton > button {
-        background-color: #FF4B4B !important;
-        color: white !important;
+        background: linear-gradient(90deg, #FF4B4B 0%, #FF2B2B 100%);
+        color: white;
         height: 4em;
         width: 100%;
         border-radius: 15px;
         font-size: 20px;
-        font-weight: bold;
+        font-weight: 700;
         border: none;
-        box-shadow: 0px 4px 10px rgba(255, 75, 75, 0.3);
+        box-shadow: 0px 8px 20px rgba(255, 75, 75, 0.4);
+        transition: all 0.3s ease;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+    .stButton > button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0px 12px 25px rgba(255, 75, 75, 0.6);
+        color: white;
+    }
+
+    /* Başlık Alanı */
+    .header-card {
+        text-align: center;
+        padding: 30px;
+        background: rgba(0, 0, 0, 0.6); /* Başlık arkasına daha koyu katman */
+        border-radius: 20px;
+        margin-bottom: 30px;
+        border: 1px solid rgba(255,255,255,0.15);
+        box-shadow: 0px 10px 25px rgba(0,0,0,0.5);
     }
     
-    /* Başlık stili */
-    .main-title {
-        color: #FF4B4B;
-        text-align: center;
-        font-size: 32px;
+    h1 {
+        background: -webkit-linear-gradient(#FF4B4B, #FF9B9B);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         font-weight: 800;
-        margin-bottom: 0px;
+        margin-bottom: 5px;
+        font-size: 36px;
+    }
+    
+    h3, p {
+        color: #FFFFFF;
+        text-align: center;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -52,60 +90,86 @@ st.markdown("""
 ADMIN_PASSWORD = "onur123"
 IMAGE_FOLDER = "menu_images"
 
-# Klasörün varlığından emin ol (Hata önleyici)
 if not os.path.exists(IMAGE_FOLDER):
     os.makedirs(IMAGE_FOLDER)
 
-# --- MÜŞTERİ EKRANI ---
-if st.query_params.get("view") == "customer":
+query_params = st.query_params
+
+# --- 1. MÜŞTERİ EKRANI ---
+if query_params.get("view") == "customer":
     if "view_clicked" not in st.session_state:
         st.session_state.view_clicked = False
 
-    st.markdown('<p class="main-title">DELİ2GO SHELL KAFE</p>', unsafe_allow_html=True)
-    st.markdown('<p style="text-align:center; color:#888;">Keyifli bir mola için menümüzü inceleyin.</p>', unsafe_allow_html=True)
+    # Üst Alan (Kurumsal Header Kartı)
+    st.markdown("""
+        <div class="header-card">
+            <h1>DELİ2GO</h1>
+            <p style="color: #aaa; margin:0; font-size:16px;">Shell Kafe Deneyimi</p>
+        </div>
+    """, unsafe_allow_html=True)
 
     if not st.session_state.view_clicked:
+        st.markdown("<h3 style='text-align:center;'>Hoş Geldiniz!</h3>", unsafe_allow_html=True)
+        st.write("<p style='text-align:center; color:#ccc;'>Keyifli bir mola için güncel menümüzü inceleyin.</p>", unsafe_allow_html=True)
         st.markdown("<br>", unsafe_allow_html=True)
+        
         if st.button("📖 MENÜYÜ GÖRÜNTÜLE"):
-            st.session_state.view_clicked = True
-            st.rerun()
+            with st.spinner('Menü hazırlanıyor...'):
+                time.sleep(0.5)
+                st.session_state.view_clicked = True
+                st.rerun()
     
     if st.session_state.view_clicked:
-        # Resimleri listele
-        image_files = [f for f in os.listdir(IMAGE_FOLDER) if f.lower().endswith(('.jpg', '.jpeg', '.png'))]
-        image_files.sort() # 1.jpg, 2.jpg sırasını korur
+        image_files = sorted([f for f in os.listdir(IMAGE_FOLDER) if f.lower().endswith(('.jpg', '.jpeg', '.png'))])
         
         if image_files:
             for img_file in image_files:
-                img_path = os.path.join(IMAGE_FOLDER, img_file)
-                st.image(img_path, use_container_width=True)
+                st.image(os.path.join(IMAGE_FOLDER, img_file), use_container_width=True)
             
+            st.markdown("<br>", unsafe_allow_html=True)
             if st.button("⬅️ ANA SAYFAYA DÖN"):
                 st.session_state.view_clicked = False
                 st.rerun()
         else:
-            st.info("Menü şu an güncelleniyor... Lütfen sayfayı yenileyin.")
+            st.warning("Menü şu an güncelleniyor, lütfen biraz sonra tekrar deneyin.")
 
-# --- YÖNETİCİ PANELİ ---
+    # Alt Bilgi (Footer)
+    st.markdown("<br><hr style='opacity:0.1'>", unsafe_allow_html=True)
+    st.markdown("<p style='text-align:center; color:#777; font-size:12px;'>© 2026 Unal Grup | Dijital Menü</p>", unsafe_allow_html=True)
+
+# --- 2. YÖNETİCİ PANELİ (Arka plan buraya uygulanmaz) ---
 else:
-    st.title("⚙️ Yönetim Paneli")
-    pwd = st.text_input("Şifre", type="password")
-    
-    if pwd == ADMIN_PASSWORD:
-        st.success("Giriş Yapıldı")
-        uploaded = st.file_uploader("Menü Resimlerini Yükle (Çoklu)", accept_multiple_files=True)
+    # Yönetici panelinin arka planını beyaz yapalım
+    st.markdown("""
+        <style>
+        .stApp {
+            background-image: none !important;
+            background-color: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        h1, h3, p { color: #000000 !important; text-align: left;}
+        </style>
+        """, unsafe_allow_html=True)
         
-        if st.button("SİSTEME YÜKLE"):
-            if uploaded:
-                # Önce klasörü boşalt
-                for f in os.listdir(IMAGE_FOLDER):
-                    os.remove(os.path.join(IMAGE_FOLDER, f))
-                
-                # Yeni resimleri kaydet
-                for file in uploaded:
-                    with open(os.path.join(IMAGE_FOLDER, file.name), "wb") as f:
-                        f.write(file.getvalue())
-                st.success("Menü başarıyla yüklendi! Lütfen müşteri ekranından kontrol edin.")
-                st.balloons()
-
-    st.markdown("<br><br><p style='font-size:10px; opacity:0.3;'>Unal Grup</p>", unsafe_allow_html=True)
+    st.title("⚙️ Yönetim Paneli")
+    password = st.text_input("Giriş Şifresi:", type="password")
+    
+    if password == ADMIN_PASSWORD:
+        st.success("Sisteme erişim sağlandı.")
+        with st.expander("Menü Sayfalarını Yükle", expanded=True):
+            uploaded_files = st.file_uploader("JPG/PNG Formatında Sayfaları Seçin", accept_multiple_files=True)
+            
+            if st.button("SİSTEMİ GÜNCELLE"):
+                if uploaded_files:
+                    # Klasörü temizle
+                    for f in os.listdir(IMAGE_FOLDER):
+                        os.remove(os.path.join(IMAGE_FOLDER, f))
+                    
+                    # Yeni dosyaları kaydet
+                    for uploaded_file in uploaded_files:
+                        with open(os.path.join(IMAGE_FOLDER, uploaded_file.name), "wb") as f:
+                            f.write(uploaded_file.getvalue())
+                    st.success("Dijital menü başarıyla güncellendi!")
+                    st.balloons()
+                else:
+                    st.error("Lütfen önce resim dosyalarını seçin.")

@@ -17,7 +17,7 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
     
     .stApp {
-        background-image: url('https://raw.githubusercontent.com/onur_unal/qr-menu/main/background.png');
+        background-image: url('https://raw.githubusercontent.com/onurustaoglu03-afk/qr-menu/main/background.png');
         background-position: center;
         background-attachment: fixed;
         font-family: 'Poppins', sans-serif;

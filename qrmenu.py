@@ -22,9 +22,8 @@ def set_bg_from_file(bin_file):
             background-position: center;
             background-attachment: fixed;
         }}
-        /* Görselin üzerine koyu katman (Yazıların okunması için) */
         .stApp > div:first-child {{
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.4); /* Karartmayı biraz azalttım görsel netleşsin diye */
         }}
         </style>
         '''
@@ -38,15 +37,16 @@ st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;800&display=swap');
     
-    /* Kart Tasarımı */
+    /* Header Kartı - Daha yukarıda ve daha şık */
     .header-card {
         text-align: center;
-        padding: 25px;
-        background: rgba(255, 255, 255, 0.05);
+        padding: 20px;
+        background: rgba(255, 255, 255, 0.08);
         border-radius: 20px;
         border: 1px solid rgba(255,255,255,0.1);
-        margin-bottom: 30px;
-        backdrop-filter: blur(5px);
+        margin-top: -30px; /* Kutuyu yukarı çektik */
+        margin-bottom: 60px; /* Altındaki butona mesafe bıraktık */
+        backdrop-filter: blur(8px);
     }
     
     h1 {
@@ -55,10 +55,9 @@ st.markdown("""
         font-weight: 800;
         font-size: 38px;
         margin: 0;
-        letter-spacing: 1px;
     }
 
-    /* Kırmızı Buton */
+    /* Kırmızı Buton - Sayfanın daha altında durması için */
     .stButton > button {
         background: linear-gradient(90deg, #FF4B4B 0%, #CC0000 100%) !important;
         color: white !important;
@@ -69,17 +68,16 @@ st.markdown("""
         font-weight: bold;
         border: none;
         box-shadow: 0px 8px 15px rgba(0,0,0,0.3);
-        transition: all 0.3s ease;
-    }
-    
-    .stButton > button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0px 12px 20px rgba(255, 75, 75, 0.4);
+        margin-top: 150px; /* Görselin ortasının açılması için butonu aşağı ittik */
     }
 
-    /* Yazı Renkleri */
     p, span, label, .stMarkdown {
         color: white !important;
+    }
+    
+    /* Gereksiz boşlukları temizle */
+    .block-container {
+        padding-top: 2rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -95,12 +93,12 @@ if st.query_params.get("view") == "customer":
     if "view_clicked" not in st.session_state:
         st.session_state.view_clicked = False
 
-    st.markdown('<div class="header-card"><h1>DELİ2GO</h1><p style="margin:0; opacity:0.7;">Shell Kafe Deneyimi</p></div>', unsafe_allow_html=True)
+    # Üstteki logo kutusu
+    st.markdown('<div class="header-card"><h1>DELİ2GO</h1><p style="margin:0; opacity:0.8; color:white;">Shell Kafe Deneyimi</p></div>', unsafe_allow_html=True)
 
     if not st.session_state.view_clicked:
-        st.markdown("<h3 style='text-align:center;'>Hoş Geldiniz!</h3>", unsafe_allow_html=True)
-        st.write("<p style='text-align:center; opacity:0.9;'>Kahve keyfinize eşlik edecek menümüzü görmek için dokunun.</p>", unsafe_allow_html=True)
-        st.markdown("<br>", unsafe_allow_html=True)
+        # Orta kısım boş bırakıldı (Görselin görünmesi için)
+        st.markdown("<div style='height: 10vh;'></div>", unsafe_allow_html=True)
         
         if st.button("📖 MENÜYÜ GÖRÜNTÜLE"):
             st.session_state.view_clicked = True
@@ -113,27 +111,24 @@ if st.query_params.get("view") == "customer":
                 st.image(os.path.join(IMAGE_FOLDER, img_file), use_container_width=True)
             
             st.markdown("<br>", unsafe_allow_html=True)
-            if st.button("⬅️ GERİ DÖN"):
+            if st.button("⬅️ ANA SAYFAYA DÖN"):
                 st.session_state.view_clicked = False
                 st.rerun()
         else:
-            st.warning("Menü şu an güncelleniyor, lütfen bekleyin...")
+            st.warning("Menü şu an güncelleniyor...")
 
 # --- YÖNETİCİ PANELİ ---
 else:
     st.title("⚙️ Yönetim Paneli")
-    # Yönetici panelinde arka planı kapatalım
     st.markdown("<style>.stApp {background-image: none !important; background-color: #111 !important;}</style>", unsafe_allow_html=True)
     
     pwd = st.text_input("Şifre", type="password")
     if pwd == ADMIN_PASSWORD:
-        st.success("Yetki Onaylandı")
-        uploaded = st.file_uploader("Menü Sayfalarını Seçin", accept_multiple_files=True)
+        uploaded = st.file_uploader("Menü Resimlerini Yükle", accept_multiple_files=True)
         if st.button("Menüyü Yayına Al"):
             if uploaded:
                 for f in os.listdir(IMAGE_FOLDER): os.remove(os.path.join(IMAGE_FOLDER, f))
                 for file in uploaded:
                     with open(os.path.join(IMAGE_FOLDER, file.name), "wb") as f:
                         f.write(file.getvalue())
-                st.success("Menü başarıyla güncellendi!")
-                st.balloons()
+                st.success("Menü güncellendi!")
